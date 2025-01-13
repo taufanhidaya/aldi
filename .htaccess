@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# Mengarahkan URL utama ke index.php dengan parameter x
+RewriteRule ^([a-zA-Z0-9_-]+)$ index.php?x=$1 [L]
+
+# Mengarahkan URL dengan sub-parameter
+RewriteRule ^([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ index.php?x=$1&sub=$2 [L]
+
+# Menangani file atau direktori yang ada
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
