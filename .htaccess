@@ -1,11 +1,56 @@
+# Mengaktifkan modul rewrite
 RewriteEngine On
 
-# Mengarahkan URL utama ke index.php dengan parameter x
-RewriteRule ^([a-zA-Z0-9_-]+)$ index.php?x=$1 [L]
-
-# Mengarahkan URL dengan sub-parameter
-RewriteRule ^([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ index.php?x=$1&sub=$2 [L]
-
-# Menangani file atau direktori yang ada
+# --- ROUTING URL ---
+# Jika file atau folder yang diminta tidak ada, gunakan aturan di bawah
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+
+# Routing URL dengan satu parameter, seperti "/home" atau "/profil"
+RewriteRule ^([a-zA-Z0-9_-]+)$ index.php?x=$1 [L]
+
+# Routing URL dengan subparameter, seperti "/divisi/gunung_hutan"
+RewriteRule ^([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$ index.php?x=$1&sub=$2 [L]
+
+# --- BLOKIR FILE SENSITIF ---
+# Memblokir akses langsung ke file penting seperti ".htaccess", ".env", atau file konfigurasi
+<FilesMatch "(\.htaccess|\.env|config\.php|db\.php|\.ini|\.log|\.bak)$">
+    Require all denied
+</FilesMatch>
+
+# --- KEPALA KEAMANAN ---
+# Menambahkan header keamanan untuk perlindungan dasar
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header set Referrer-Policy "no-referrer-when-downgrade"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# --- PENGATURAN CACHE ---
+# Mengatur cache untuk meningkatkan performa
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
+# --- MENCEGAH LISTING DIREKTORI ---
+# Jika direktori kosong, jangan tampilkan isi folder
+Options -Indexes
+
+# --- PEMBATASAN UPLOAD FILE BESAR ---
+# Membatasi ukuran file upload untuk keamanan (opsional)
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+</IfModule>

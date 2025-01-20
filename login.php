@@ -144,7 +144,8 @@
 
                     <a href="#" class="text-decoration-none text-right">Forgot password?</a>
                 </div>
-                <button type="submit" class="btn w-100" style="background: linear-gradient(35deg, #000000, #FFD700); color: white; border: none;">LOGIN</button>
+                <button type="submit" class="btn w-100"
+                    style="background: linear-gradient(35deg, #000000, #FFD700); color: white; border: none;">LOGIN</button>
 
             </form>
         </div>

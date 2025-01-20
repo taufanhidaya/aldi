@@ -16,32 +16,41 @@ if (isset($_POST['input_kegiatan_validate'])) {
     $tiktok_url = $_POST['tiktok_url'];
     $facebook_url = $_POST['facebook_url'];
 
-    // Proses upload media
+    // Direktori upload
     $target_dir = "../media/kegiatan/";
     $media_name = basename($media['name']);
     $target_file = $target_dir . $media_name;
 
-    if (move_uploaded_file($media['tmp_name'], $target_file)) {
-        // Simpan data ke database
-        $sql = "INSERT INTO kegiatan (media, nm_kegiatan, nm_pengurus, tgl_kegiatan, lokasi, divisi, deskripsi, youtube_url, instagram_url, tiktok_url, facebook_url) 
-                VALUES ('$media_name', '$nm_kegiatan', '$nm_pengurus', '$tgl_kegiatan', '$lokasi', '$divisi', '$deskripsi', '$youtube_url', '$instagram_url', '$tiktok_url', '$facebook_url')";
-        
-        if (mysqli_query($conn, $sql)) {
-            // Redirect berdasarkan divisi
-            if (!empty($divisi)) {
-                // Jika divisi diisi, redirect ke halaman divisi
-                $divisi_slug = strtolower(str_replace(' ', '_', $divisi));
-                header("Location: ../page/divisi/$divisi_slug.php");
+    // Validasi tipe file
+    $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/mpeg', 'video/avi'];
+    $file_type = mime_content_type($media['tmp_name']);
+
+    if (in_array($file_type, $allowed_types)) {
+        // Proses upload file
+        if (move_uploaded_file($media['tmp_name'], $target_file)) {
+            // Simpan data ke database
+            $sql = "INSERT INTO kegiatan (media, nm_kegiatan, nm_pengurus, tgl_kegiatan, lokasi, divisi, deskripsi, youtube_url, instagram_url, tiktok_url, facebook_url) 
+                    VALUES ('$media_name', '$nm_kegiatan', '$nm_pengurus', '$tgl_kegiatan', '$lokasi', '$divisi', '$deskripsi', '$youtube_url', '$instagram_url', '$tiktok_url', '$facebook_url')";
+            
+            if (mysqli_query($conn, $sql)) {
+                // Redirect berdasarkan divisi
+                if (!empty($divisi)) {
+                    // Jika divisi diisi, redirect ke halaman divisi
+                    $divisi_slug = strtolower(str_replace(' ', '_', $divisi));
+                    header("Location: ../page/divisi/$divisi_slug.php");
+                } else {
+                    // Jika divisi tidak diisi, redirect ke halaman kegiatan
+                    header("Location: ../page/kegiatan.php");
+                }
+                exit();
             } else {
-                // Jika divisi tidak diisi, redirect ke halaman kegiatan
-                header("Location: ../page/kegiatan.php");
+                echo "Error: " . mysqli_error($conn);
             }
-            exit();
         } else {
-            echo "Error: " . mysqli_error($conn);
+            echo "Error uploading media.";
         }
     } else {
-        echo "Error uploading media.";
+        echo "File type not allowed. Only images (JPEG, PNG, GIF) and videos (MP4, MPEG, AVI) are accepted.";
     }
 }
 ?>

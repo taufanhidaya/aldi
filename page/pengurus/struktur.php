@@ -1,37 +1,195 @@
-<?php
-// Koneksi database
-include 'proses/connect.php';
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --line-color: #ffffff;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #004d1a, #003300);
+            padding: 2rem;
+        }
 
-// Fungsi untuk menentukan kunci array
-function tentukanKunci($jabatan, $bidang) {
-  if (empty($bidang)) {
-    return $jabatan; // Jika bidang kosong, gunakan jabatan
-  }
-  if ($jabatan == 'anggota' || $jabatan == 'ketua') {
-    return $bidang; // Jika jabatan anggota/ketua, gunakan bidang
-  }
-  return $jabatan; // Default gunakan jabatan
-}
+        .org-chart {
+            padding: 20px;
+        }
 
-// Query untuk mengambil data pengurus
-$query = "SELECT nm_pengurus, jabatan, bidang, media FROM pengurus";
-$result = $conn->query($query);
+        .level {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            padding: 20px 0;
+        }
 
-// Array untuk menyimpan data pengurus berdasarkan kondisi
-$data_pengurus = [];
-if ($result->num_rows > 0) {
-  while ($row = $result->fetch_assoc()) {
-    $kunci = tentukanKunci($row['jabatan'], $row['bidang']);
-    $data_pengurus[$kunci] = [
-      'nama' => htmlspecialchars($row['nm_pengurus']),
-      'foto' => !empty($row['media']) ? "media/pengurus/" . htmlspecialchars($row['media']) : "assets/img/profil.jpeg"
-    ];
-  }
-}
-?>
+        /* Lines */
+        .vertical-line {
+            position: absolute;
+            width: 2px;
+            background: var(--line-color);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
 
-<!-- Struktur Organisasi -->
+        .horizontal-line {
+            position: absolute;
+            height: 2px;
+            background: var(--line-color);
+            z-index: 1;
+        }
 
+        /* Top vertical line */
+        .top-line {
+            top: 0;
+            height: 30px;
+        }
+
+        /* First horizontal line */
+        .first-level-line {
+            width: 50%;
+            left: 25%;
+            top: 30px;
+        }
+
+        /* Second horizontal line */
+        .second-level-line {
+            width: 80%;
+            left: 10%;
+            top: 30px;
+        }
+
+        /* Department vertical lines */
+        .dept-line {
+            top: -30px;
+            height: 30px;
+        }
+
+        /* Card styling */
+        .org-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+            width: 180px;
+            margin: 0 15px;
+        }
+
+        .org-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .org-card img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+
+        .org-card h5 {
+            font-size: 14px;
+            color:rgb(32, 215, 93);
+            margin-bottom: 5px;
+        }
+
+        .org-card p {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Staff container */
+        .staff-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            position: relative;
+        }
+
+        .staff-container::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            width: 2px;
+            height: 30px;
+            background: var(--line-color);
+        }
+
+        /* Secretary section specific */
+        .secretary-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .secretary-line {
+            width: 2px;
+            height: 30px;
+            background: var(--line-color);
+            margin: 10px 0;
+        }
+
+        /* Department section */
+        .department-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .org-card {
+                width: 160px;
+                padding: 10px;
+            }
+
+            .org-card img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .level {
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+            }
+
+            .horizontal-line {
+                display: none;
+            }
+
+            .department-section {
+                margin: 20px 0;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
     <div class="container-fluid org-chart">
         <!-- Leader Level -->
         <div class="level">
@@ -40,7 +198,7 @@ if ($result->num_rows > 0) {
                 <h5>M.Deka Arya Putra</h5>
                 <p>Ketua Umum</p>
             </div>
-            <div class="vertical-line bottom-line"></div>
+            <div class="vertical-line top-line"></div>
         </div>
 
         <!-- First Level - Bendahara & Sekretaris -->
@@ -135,6 +293,7 @@ if ($result->num_rows > 0) {
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.org-card');
@@ -168,3 +327,5 @@ if ($result->num_rows > 0) {
             });
         });
     </script>
+</body>
+</html>

@@ -12,7 +12,7 @@
         echo '<div class="d-flex flex-wrap justify-content-start align-items-start mt-2" style="gap: 20px;">';
         while ($row = mysqli_fetch_assoc($result)) {
             echo '
-        <div class="card" style="width: 18rem; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+        <div class="card mb-2" style="width: 18rem; border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
             <a href="#" data-bs-toggle="modal" data-bs-target="#modal' . $row['id_kegiatan'] . '">
                 <img src="../../media/kegiatan/' . htmlspecialchars($row['media']) . '" alt="Media Kegiatan"
                      style="width: 100%; height: 10rem; object-fit: cover; object-position: center;">
